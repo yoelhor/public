@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0" 
+  TenantId="yourtenant.onmicrosoft.com" 
+  PolicyId="B2C_1A_AppAccessControl_SAML" 
+  PublicPolicyUri="http://yourtenant.onmicrosoft.com/B2C_1A_AppAccessControl_SAML">
+
+  <BasePolicy>
+    <TenantId>yourtenant.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_AppAccessControl_Common</PolicyId>
+  </BasePolicy>
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Token Issuer</DisplayName>
+      <TechnicalProfiles>
+    
+        <!-- SAML Token Issuer technical profile -->
+        <TechnicalProfile Id="Saml2AssertionIssuer">
+          <DisplayName>Token Issuer</DisplayName>
+          <Protocol Name="SAML2"/>
+          <OutputTokenFormat>SAML2</OutputTokenFormat>
+          <Metadata>
+            <Item Key="IssuerUri">https://issuerUriMyAppExpects</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="SamlAssertionSigning" StorageReferenceId="B2C_1A_SelfSigned2031"/>
+            <Key Id="SamlMessageSigning" StorageReferenceId="B2C_1A_SelfSigned2031"/>
+          </CryptographicKeys>
+          <InputClaims/>
+          <OutputClaims/>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Saml-issuer"/>
+        </TechnicalProfile>
+    
+        <!-- Session management technical profile for SAML-based tokens -->
+        <TechnicalProfile Id="SM-Saml-issuer">
+          <DisplayName>Session Management Provider</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.SSO.SamlSSOSessionProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"/>
+        </TechnicalProfile>
+    
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+  <UserJourneys>
+    <UserJourney Id="SignUpOrSignIn_SAML">
+      <OrchestrationSteps>
+        <OrchestrationStep Order="1" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetSamlContextParameters" TechnicalProfileReferenceId="GetSamlContextParameters" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetApplicationNameFromId" TechnicalProfileReferenceId="GetApplicationNameFromId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SignIn_Simulator" TechnicalProfileReferenceId="SignIn_Simulator" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="CreateUserRole" TechnicalProfileReferenceId="CreateUserRole" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="5" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="Saml2AssertionIssuer" />
+      </OrchestrationSteps>
+    </UserJourney>
+  </UserJourneys>
+
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="SignUpOrSignIn_SAML" />
+    <TechnicalProfile Id="PolicyProfile">
+      <DisplayName>PolicyProfile</DisplayName>
+      <Protocol Name="SAML2"/>
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub" DefaultValue="1234" />
+        <OutputClaim ClaimTypeReferenceId="appId" />
+        <OutputClaim ClaimTypeReferenceId="appName" />
+        <OutputClaim ClaimTypeReferenceId="userType" />
+        <OutputClaim ClaimTypeReferenceId="fullAppRole" />
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" ExcludeAsClaim="true" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>

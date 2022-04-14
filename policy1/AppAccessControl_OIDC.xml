@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0" 
+  TenantId="yourtenant.onmicrosoft.com" 
+  PolicyId="B2C_1A_AppAccessControl_OIDC" 
+  PublicPolicyUri="http://yourtenant.onmicrosoft.com/B2C_1A_AppAccessControl_OIDC">
+
+  <BasePolicy>
+    <TenantId>yourtenant.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_AppAccessControl_Common</PolicyId>
+  </BasePolicy>
+
+  <UserJourneys>
+    <UserJourney Id="SignUpOrSignIn_OIDC">
+      <OrchestrationSteps>
+        <OrchestrationStep Order="1" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetOidcContextParameters" TechnicalProfileReferenceId="GetOidcContextParameters" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetApplicationNameFromId" TechnicalProfileReferenceId="GetApplicationNameFromId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SignIn_Simulator" TechnicalProfileReferenceId="SignIn_Simulator" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="CreateUserRole" TechnicalProfileReferenceId="CreateUserRole" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="5" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+      </OrchestrationSteps>
+    </UserJourney>
+  </UserJourneys>
+  
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="SignUpOrSignIn_OIDC" />
+    <TechnicalProfile Id="PolicyProfile">
+      <DisplayName>PolicyProfile</DisplayName>
+      <Protocol Name="OpenIdConnect" />
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub" DefaultValue="1234" />
+        <OutputClaim ClaimTypeReferenceId="appId" />
+        <OutputClaim ClaimTypeReferenceId="appName" />
+        <OutputClaim ClaimTypeReferenceId="userType" />
+        <OutputClaim ClaimTypeReferenceId="fullAppRole" />
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>

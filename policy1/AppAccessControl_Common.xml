@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0" 
+  TenantId="yourtenant.onmicrosoft.com" 
+  PolicyId="B2C_1A_AppAccessControl_Common" 
+  PublicPolicyUri="http://yourtenant.onmicrosoft.com/B2C_1A_AppAccessControl_Common">
+
+  <BasePolicy>
+    <TenantId>yourtenant.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkExtensions</PolicyId>
+  </BasePolicy>
+
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <ClaimType Id="appId">
+        <DisplayName>Application unique identifier</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="appName">
+        <DisplayName>Application name</DisplayName>
+        <DataType>string</DataType>
+        <Restriction>
+          <Enumeration Text="63ba0d17-c4ba-47fd-89e9-31b3c2734339" Value="jwtms" />
+          <Enumeration Text="567c4bf3-fdca-404c-8cbe-11f2036aa50a" Value="jwtio" />
+          <Enumeration Text="https://irisflower.onmicrosoft.com/saml-app1" Value="saml1" />
+        </Restriction>
+      </ClaimType>
+      <ClaimType Id="userType">
+        <DisplayName>Select a user type</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Add help text here</UserHelpText>
+        <UserInputType>DropdownSingleSelect</UserInputType>
+        <Restriction>
+          <Enumeration Text="Manager" Value="manager" />
+          <Enumeration Text="Teacher" Value="teacher" />
+          <Enumeration Text="Student" Value="student" SelectByDefault="true" />
+        </Restriction>
+      </ClaimType>
+      <ClaimType Id="fullAppRole">
+        <DisplayName>Full app role name</DisplayName>
+        <DataType>string</DataType>
+      	<AdminHelpText>Add help text here</AdminHelpText>
+      </ClaimType>
+
+    </ClaimsSchema>
+
+    <ClaimsTransformations>
+      <!-- Get the app name from app id (appName claim) collection-->
+      <ClaimsTransformation Id="GetApplicationNameFromId" TransformationMethod="GetMappedValueFromLocalizedCollection">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="appId" TransformationClaimType="mapFromClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="appName" TransformationClaimType="restrictionValueClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+
+      <!-- Create the app role name out of the appName and userType-->
+      <ClaimsTransformation Id="CreateFullAppRole" TransformationMethod="FormatStringMultipleClaims">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="appName" TransformationClaimType="inputClaim1" />
+          <InputClaim ClaimTypeReferenceId="userType" TransformationClaimType="inputClaim2" />
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="stringFormat" DataType="string" Value="{0}_{1}" />
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="fullAppRole" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Role-based access control</DisplayName>
+      <TechnicalProfiles>
+        <!-- Get the OpenID connect application ID-->
+        <TechnicalProfile Id="GetOidcContextParameters">
+          <DisplayName>Get OpenID Connect context parameters</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IncludeClaimResolvingInClaimsHandling">true</Item>
+          </Metadata>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="appId" DefaultValue="{OIDC:ClientId}" AlwaysUseDefaultValue="true" />
+          </OutputClaims>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+
+        <!-- Get the SAML service provider issuer name-->
+        <TechnicalProfile Id="GetSamlContextParameters">
+          <DisplayName>Get SAML context parameters</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IncludeClaimResolvingInClaimsHandling">true</Item>
+          </Metadata>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="appId" DefaultValue="{SAML:Issuer}" AlwaysUseDefaultValue="true" />
+          </OutputClaims>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+
+        <!-- Converts the app ID to app name-->
+        <TechnicalProfile Id="GetApplicationNameFromId">
+          <DisplayName>Get an application name from app Id</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="appName" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="GetApplicationNameFromId" />
+          </OutputClaimsTransformations>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+
+        <!-- This technical profile just simulates a user sign-in.
+            It returns the type of the user. Base on the type we'll create the role ID-->
+        <TechnicalProfile Id="SignIn_Simulator">
+          <DisplayName>SignIn Simulator</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ContentDefinitionReferenceId">api.selfasserted</Item>
+          </Metadata>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="userType" Required="true" />
+          </OutputClaims>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+
+        <!-- Converts the app ID to app name-->
+        <TechnicalProfile Id="CreateUserRole">
+          <DisplayName>Create a user role</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="appName" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CreateFullAppRole" />
+          </OutputClaimsTransformations>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+</TrustFrameworkPolicy>
