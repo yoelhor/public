@@ -21,8 +21,8 @@ To be done:
 ## Live demo
 
 - [App 1 (jwt.ms)](https://irisflower.b2clogin.com/irisflower.onmicrosoft.com/B2C_1A_AppAccessControl_OIDC/oauth2/v2.0/authorize?client_id=63ba0d17-c4ba-47fd-89e9-31b3c2734339&nonce=defaultNonce&redirect_uri=https%3A%2F%2Fjwt.ms&scope=openid&response_type=id_token&prompt=login&disable_cache=true)
-- [App 2 (jwt.io](https://irisflower.b2clogin.com/irisflower.onmicrosoft.com/B2C_1A_APPACCESSCONTROL_OIDC/oauth2/v2.0/authorize?client_id=567c4bf3-fdca-404c-8cbe-11f2036aa50a&nonce=defaultNonce&redirect_uri=https%3A%2F%2Fjwt.io&scope=openid&response_type=id_token&prompt=login)
-- [App that dosn't have the mapping](https://irisflower.b2clogin.com/irisflower.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_APPACCESSCONTROL_OIDC&client_id=1301223c-b6f9-4471-8bfc-52f9469c9aad&nonce=defaultNonce&redirect_uri=https%3A%2F%2Fjwt.ms&scope=openid&response_type=id_token&prompt=login)
+- [App 2 (jwt.io)](https://irisflower.b2clogin.com/irisflower.onmicrosoft.com/B2C_1A_APPACCESSCONTROL_OIDC/oauth2/v2.0/authorize?client_id=567c4bf3-fdca-404c-8cbe-11f2036aa50a&nonce=defaultNonce&redirect_uri=https%3A%2F%2Fjwt.io&scope=openid&response_type=id_token&prompt=login)
+- [App that dosn't have the mapping](https://irisflower.b2clogin.com/irisflower.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_APPACCESSCONTROL_OIDC&client_id=1301223c-b6f9-4471-8bfc-52f9469c9aad&nonce=defaultNonce&redirect_uri=https%3A%2F%2Fjwt.ms&scope=openid&response_type=id_token&prompt=login). This flow returns an error message since the appName claim is empty. We need to think how to fix it. Maybe having a default value.
 - For SAML app, use the [SAML test application](https://samltestapp2.azurewebsites.net/SP) to test this policy. In the SAML test app provide the following information:
 
     - **Tenant Name**: `irisflower`
